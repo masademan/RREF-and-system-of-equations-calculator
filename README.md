@@ -11,5 +11,10 @@ Just follow the prompts to input the system of equations and you should get an o
 If you get an error, read it. If it says that the augmented matrix was invalid, something was wrong with your input\
 If it's another error, then it's a formatting or computation error, and the means there's an unseen bug in the code
 
+When using one of the 2 prior commands, you can type in the values for the matrix manually, or you can use a .csv file\
+You can look at the example .csv files that are given to see how they should be formatted
+
+⠀
+
 Run "py timing_test.py" to test the 2 functions that are available and see how long they take to run\
 The parameters for timing are explained with comments are in the code and are pretty self explanatory
