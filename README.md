@@ -1,2 +1,15 @@
-# RREF-and-system-of-equations-calculator
-This code has an algorithm to calculate the RREF of a matrix, which can also be used to solve systems of equations.
+Run "py main.py" for the calculator that only uses floats and int\
+This is fast, but can quickly lose precision because of floating point errors\
+Just follow the prompts to input the system of equations and you should get an output if you did everything correctly\
+If you get an error, read it. If it says that the augmented matrix was invalid, something was wrong with your input\
+If it's another error, then it's a formatting or computation error, and the means there's an unseen bug in the code
+
+Run "py fractional_version.py" for the calculator that can use floats, ints, and fractions\
+The program will prompt you if you want to use floats and ints, or fractions\
+Fractions are infinitely more precise than floats, but make the calculations much slower\
+Just follow the prompts to input the system of equations and you should get an output if you did everything correctly\
+If you get an error, read it. If it says that the augmented matrix was invalid, something was wrong with your input\
+If it's another error, then it's a formatting or computation error, and the means there's an unseen bug in the code
+
+Run "py timing_test.py" to test the 2 functions that are available and see how long they take to run\
+The parameters for timing are explained with comments are in the code and are pretty self explanatory
