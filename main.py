@@ -482,11 +482,12 @@ def systems_of_equation_solver(
             if int(value) == value and int_if_possible:
                 value = int(value)
 
-            if (RREF_matrix[row_idx, :-1] == 0).sum() == 1:
+            if (RREF_matrix[row_idx, :-1] == 1).sum() == 1 and (RREF_matrix[row_idx, :-1] == 0).sum() == RREF_matrix.shape[1] - 2:
                 if all_str:
                     variable_values.append(str(value))
                 else:
                     variable_values.append(value)
+
             else:
                 # Show the values as a string because it relies on other variables
                 # Use "np.where(row != 0)[0][1:]" to get the coefficients of the other variables that are relied on

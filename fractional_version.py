@@ -235,7 +235,7 @@ if __name__ == "__main__":
     print(augmented_matrix.astype(str))
     print()
     print("Equations:")
-    print(augmented_matrix_to_equation_strs(augmented_matrix, int_if_possible=True, all_plus_form=True, all_vars=False, show_all_coefficients=True))
+    print(augmented_matrix_to_equation_strs(augmented_matrix, int_if_possible=True, all_plus_form=True, all_vars=True, show_all_coefficients=True))
     print()
     print("RREF:")
     print(RREF_func(augmented_matrix).astype(str))
