@@ -168,7 +168,7 @@ def get_yes_no_answer(question: str) -> bool:
         return answer == "y"
 
 
-def get_augmented_matrix() -> np.ndarray:
+def get_augmented_matrix() -> tuple[np.ndarray, bool]:
     while True:
         clear_console()
 
@@ -202,7 +202,13 @@ def get_augmented_matrix() -> np.ndarray:
             "\n      But it'll slow down the calculations" \
             "\nAnswer (y/n): "
         )
-    return get_augmented_matrix_csv(get_csv_file_path(), use_fractions=use_fractions, force_fractions=force_fractions)
+
+    show_as_fractions = get_yes_no_answer(
+        "Do you want to show the RREF matrix in fractional form?" \
+        "\nAnswer (y/n): "
+    )
+
+    return get_augmented_matrix_csv(get_csv_file_path(), use_fractions=use_fractions, force_fractions=force_fractions), show_as_fractions
 
 
 def convert_list_to_fraction_list(num_list: list[int | float]) -> list[Fraction]:
@@ -225,7 +231,7 @@ if __name__ == "__main__":
     RREF_func = gauss_jordan_elimination
     # RREF_func = column_by_column_RREF
 
-    augmented_matrix = get_augmented_matrix()
+    augmented_matrix, show_as_fraction = get_augmented_matrix()
     # augmented_matrix = get_augmented_matrix_input(use_fractions=True)
     # augmented_matrix = get_augmented_matrix_csv("equation_1.csv", force_fractions=True)
     # augmented_matrix = get_augmented_matrix_csv("equation_2.csv")
@@ -238,7 +244,10 @@ if __name__ == "__main__":
     print(augmented_matrix_to_equation_strs(augmented_matrix, int_if_possible=True, all_plus_form=True, all_vars=True, show_all_coefficients=True))
     print()
     print("RREF:")
-    print(RREF_func(augmented_matrix).astype(str))
+    if show_as_fraction:
+        print(RREF_func(augmented_matrix).astype(str))
+    else:
+        print(RREF_func(augmented_matrix).astype(float))
     print()
     print("Variable values:")
     print(
