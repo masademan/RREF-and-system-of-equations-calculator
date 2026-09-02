@@ -228,8 +228,8 @@ def convert_ndarray_to_fraction_ndarray(matrix: np.ndarray) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    RREF_func = gauss_jordan_elimination
-    # RREF_func = column_by_column_RREF
+    # RREF_func = gauss_jordan_elimination
+    RREF_func = column_by_column_RREF
 
     augmented_matrix, show_as_fraction = get_augmented_matrix()
     # augmented_matrix = get_augmented_matrix_input(use_fractions=True)
