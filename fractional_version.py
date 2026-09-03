@@ -180,14 +180,7 @@ def get_augmented_matrix() -> tuple[np.ndarray, bool]:
             continue
 
         break
-
-    if input_option == "m":
-        return get_augmented_matrix_input(
-            use_fractions=get_yes_no_answer(
-                "Do you want to use fractions?" \
-                "\nNote: It makes the calculations slower, but far more precise" "\nAnswer (y/n): "
-            )
-        )
+        
     use_fractions = get_yes_no_answer(
         "Do you want to use fractions?" \
         "\nNote 1: It makes the calculations slower, but far more precise" \
@@ -195,20 +188,24 @@ def get_augmented_matrix() -> tuple[np.ndarray, bool]:
         "\nAnswer (y/n): "
     )
     force_fractions = False
+    show_as_fractions = False
     if use_fractions:
-        force_fractions = get_yes_no_answer(
-            "Do you want to force fractions?" \
-            "\nNote: This WILL force all the numbers to be fractions no matter what. This will make all future calculations immune to floating point precision errors" \
-            "\n      But it'll slow down the calculations" \
+        if input_option == "f":
+            force_fractions = get_yes_no_answer(
+                "Do you want to force fractions?" \
+                "\nNote: This WILL force all the numbers to be fractions no matter what. This will make all future calculations immune to floating point precision errors" \
+                "\n      But it'll slow down the calculations" \
+                "\nAnswer (y/n): "
+            )
+
+        show_as_fractions = get_yes_no_answer(
+            "Do you want to show the RREF matrix in fractional form?" \
             "\nAnswer (y/n): "
         )
 
-    show_as_fractions = get_yes_no_answer(
-        "Do you want to show the RREF matrix in fractional form?" \
-        "\nAnswer (y/n): "
-    )
-
-    return get_augmented_matrix_csv(get_csv_file_path(), use_fractions=use_fractions, force_fractions=force_fractions), show_as_fractions
+    if input_option == "f":
+        return get_augmented_matrix_csv(get_csv_file_path(), use_fractions=use_fractions, force_fractions=force_fractions), show_as_fractions
+    return get_augmented_matrix_input(use_fractions=use_fractions), show_as_fractions
 
 
 def convert_list_to_fraction_list(num_list: list[int | float]) -> list[Fraction]:

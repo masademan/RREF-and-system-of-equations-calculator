@@ -554,6 +554,7 @@ if __name__ == "__main__":
     # augmented_matrix = get_augmented_matrix_csv("test.csv")
     # augmented_matrix = get_augmented_matrix_csv("equation_1.csv")
     # augmented_matrix = get_augmented_matrix_csv("equation_2.csv")
+    
     clear_console()
     print("Original augmented matrix:")
     print(augmented_matrix)
