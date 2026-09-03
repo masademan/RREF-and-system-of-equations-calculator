@@ -420,14 +420,14 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
             clean_matrix(matrix)
 
         # Add suitable multiples of the top row to the rows below so that the entries below the 1 become 0
-        matrix[row_idx + 1 :] += np.outer(-matrix[row_idx + 1 :, column_idx], matrix[row_idx, :])
+        matrix[row_idx + 1:] += np.outer(-matrix[row_idx + 1:, column_idx], matrix[row_idx, :])
 
         if matrix.dtype != object:
             clean_matrix(matrix)
 
         # Add suitable multiples of the top row to the rows above so that the entries below the 1 become 0
         if row_idx > 0:
-            matrix[: row_idx - 1] += np.outer(-matrix[: row_idx - 1, column_idx], matrix[row_idx, :])
+            matrix[:row_idx] += np.outer(-matrix[:row_idx, column_idx], matrix[row_idx, :])
 
             if matrix.dtype != object:
                 clean_matrix(matrix)
@@ -545,7 +545,6 @@ if __name__ == "__main__":
     """
     Show that the Ti-84 evo also has the option to show the RREF matrix after solving a system of equations
     """
-
     RREF_func = gauss_jordan_elimination
     # RREF_func = column_by_column_RREF
 
