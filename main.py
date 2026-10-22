@@ -210,7 +210,7 @@ def augmented_matrix_to_equation_strs(
 def get_augmented_matrix() -> np.ndarray:
     while True:
         clear_console()
-        
+
         input_option = input("Do you want to input the matrix manually (M) or use a .csv file (F)? ").strip().lower()
 
         if input_option not in ["m", "f"]:
@@ -238,19 +238,19 @@ def is_REF(matrix: np.ndarray) -> bool:
     # In 2 vertically consecutive rows that aren't all 0's, the leading
     #  entry in the lower row appears farther to the right than the leading
     #  entry in the higher row.
-    last_leading_entry_j = 0
+    last_leading_entry_j = -1
     for i in range(matrix.shape[0]):
         row = matrix[i]
 
         if (row == 0).all():
             break
 
-        for j in range(row.shape[0]):
+        for j in range(matrix.shape[1]):
             item = row[j]
             if item == 0:
                 continue
             elif item == 1:
-                if i != 0 and last_leading_entry_j >= j:
+                if last_leading_entry_j >= j:
                     return False
 
                 last_leading_entry_j = j
@@ -273,12 +273,12 @@ def is_RREF(matrix: np.ndarray) -> bool:
         if (row == 0).all():
             break
 
-        for j in range(row.shape[0]):
+        for j in range(matrix.shape[1]):
             item = row[j]
             if item == 0:
                 continue
             elif item == 1:
-                if (matrix[:, j] == 0).sum() == 1:
+                if not ((matrix[:, j] == 0).sum() == matrix.shape[1] - 1 and (matrix[:, j] == 1).sum() == 1):
                     return False
                 break
 
@@ -387,7 +387,7 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
     row_idx = 0
 
     while not is_RREF(matrix) and row_idx < matrix.shape[0]:
-        if (matrix == 0).all():
+        if (matrix[row_idx:] == 0).all():
             break
 
         if matrix.dtype != object:
@@ -402,7 +402,7 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
 
         # If the top row in the column found is a 0, swap it with another row
         if matrix[row_idx, column_idx] == 0:
-            sub_row_idx = 0
+            sub_row_idx = row_idx
 
             while sub_row_idx < matrix.shape[0]:
                 if matrix[sub_row_idx, column_idx] != 0:
@@ -420,7 +420,7 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
             clean_matrix(matrix)
 
         # Add suitable multiples of the top row to the rows below so that the entries below the 1 become 0
-        matrix[row_idx + 1:] += np.outer(-matrix[row_idx + 1:, column_idx], matrix[row_idx, :])
+        matrix[row_idx + 1 :] += np.outer(-matrix[row_idx + 1 :, column_idx], matrix[row_idx, :])
 
         if matrix.dtype != object:
             clean_matrix(matrix)
@@ -458,6 +458,8 @@ def systems_of_equation_solver(
     all_plus_form: bool = False,
     show_all_coefficients: bool = True,
     RREF_func: Callable[[np.ndarray], np.ndarray] = gauss_jordan_elimination,
+    show_zero_constants: bool = True,
+    do_coefficient_parentheses: bool = True,
 ) -> list[str | float | int]:
     if not is_valid_augmented_matrix(augmented_matrix):
         raise ValueError("The matrix given is not a valid augmented matrix")
@@ -481,16 +483,13 @@ def systems_of_equation_solver(
             value = RREF_matrix[row_idx, -1]
             if int(value) == value and int_if_possible:
                 value = int(value)
-
-            if (RREF_matrix[row_idx, :-1] == 1).sum() == 1 and (RREF_matrix[row_idx, :-1] == 0).sum() == RREF_matrix.shape[1] - 2:
+                
+            if (RREF_matrix[row_idx, :-1] == 1).sum() == 1 and (RREF_matrix[row_idx, :-1] == 0).sum() in {RREF_matrix.shape[1] - 1, RREF_matrix.shape[1] - 2}:
                 if all_str:
                     variable_values.append(str(value))
                 else:
                     variable_values.append(value)
-
             else:
-                # Show the values as a string because it relies on other variables
-                # Use "np.where(row != 0)[0][1:]" to get the coefficients of the other variables that are relied on
                 str_pieces = [str(value)]
 
                 variable_idxs = np.where(RREF_matrix[row_idx, :-1] != 0)[0][1:]
@@ -505,7 +504,10 @@ def systems_of_equation_solver(
                             var_coeff = int(var_coeff)
 
                         if var_coeff != 1 or show_all_coefficients:
-                            str_pieces.append(f"({var_coeff})x_{variable_idx + 1}")
+                            if do_coefficient_parentheses and var_coeff > 0:
+                                str_pieces.append(f"({var_coeff})x_{variable_idx + 1}")
+                            else:
+                                str_pieces.append(f"{var_coeff}x_{variable_idx + 1}")
                         else:
                             str_pieces.append(f"x_{variable_idx + 1}")
                     else:
@@ -516,9 +518,17 @@ def systems_of_equation_solver(
                         str_pieces.append("+" if var_coeff > 0 else "-")
 
                         if abs(var_coeff) != 1 or show_all_coefficients:
-                            str_pieces.append(f"({abs(var_coeff)})x_{variable_idx + 1}")
+                            if do_coefficient_parentheses:
+                                str_pieces.append(f"({abs(var_coeff)})x_{variable_idx + 1}")
+                            else:
+                                str_pieces.append(f"{abs(var_coeff)}x_{variable_idx + 1}")
                         else:
                             str_pieces.append(f"x_{variable_idx + 1}")
+                            
+                epsilon = 1e-5
+                use_epsilon = False
+                if not show_zero_constants and ((value == 0 and not use_epsilon) or (abs(value) <= epsilon and use_epsilon)):
+                    str_pieces = str_pieces[2:]
 
                 variable_values.append(" ".join(str_pieces))
 
@@ -554,7 +564,7 @@ if __name__ == "__main__":
     # augmented_matrix = get_augmented_matrix_csv("test.csv")
     # augmented_matrix = get_augmented_matrix_csv("equation_1.csv")
     # augmented_matrix = get_augmented_matrix_csv("equation_2.csv")
-    
+
     clear_console()
     print("Original augmented matrix:")
     print(augmented_matrix)
@@ -569,7 +579,14 @@ if __name__ == "__main__":
     print(
         format_variable_values(
             systems_of_equation_solver(
-                augmented_matrix, all_str=True, int_if_possible=True, all_plus_form=True, show_all_coefficients=True, RREF_func=RREF_func
+                augmented_matrix,
+                all_str=True,
+                int_if_possible=True,
+                all_plus_form=True,
+                show_all_coefficients=True,
+                RREF_func=RREF_func,
+                show_zero_constants=True,
+                do_coefficient_parentheses=False,
             )
         )
     )

@@ -180,11 +180,11 @@ def get_augmented_matrix() -> tuple[np.ndarray, bool]:
             continue
 
         break
-        
+
     use_fractions = get_yes_no_answer(
-        "Do you want to use fractions?" \
-        "\nNote 1: It makes the calculations slower, but far more precise" \
-        "\nNote 2: It won't force all the numbers to be a fractions, it'll automatically convert numbers to a fraction if there's a decimal place or '/' in the data" \
+        "Do you want to use fractions?"
+        "\nNote 1: It makes the calculations slower, but far more precise"
+        "\nNote 2: It won't force all the numbers to be a fractions, it'll automatically convert numbers to a fraction if there's a decimal place or '/' in the data"
         "\nAnswer (y/n): "
     )
     force_fractions = False
@@ -192,16 +192,13 @@ def get_augmented_matrix() -> tuple[np.ndarray, bool]:
     if use_fractions:
         if input_option == "f":
             force_fractions = get_yes_no_answer(
-                "Do you want to force fractions?" \
-                "\nNote: This WILL force all the numbers to be fractions no matter what. This will make all future calculations immune to floating point precision errors" \
-                "\n      But it'll slow down the calculations" \
+                "Do you want to force fractions?"
+                "\nNote: This WILL force all the numbers to be fractions no matter what. This will make all future calculations immune to floating point precision errors"
+                "\n      But it'll slow down the calculations"
                 "\nAnswer (y/n): "
             )
 
-        show_as_fractions = get_yes_no_answer(
-            "Do you want to show the RREF matrix in fractional form?" \
-            "\nAnswer (y/n): "
-        )
+        show_as_fractions = get_yes_no_answer("Do you want to show the RREF matrix in fractional form?" "\nAnswer (y/n): ")
 
     if input_option == "f":
         return get_augmented_matrix_csv(get_csv_file_path(), use_fractions=use_fractions, force_fractions=force_fractions), show_as_fractions
@@ -250,7 +247,13 @@ if __name__ == "__main__":
     print(
         format_variable_values(
             systems_of_equation_solver(
-                augmented_matrix, all_str=True, int_if_possible=True, all_plus_form=True, show_all_coefficients=True, RREF_func=RREF_func
+                augmented_matrix,
+                all_str=True,
+                int_if_possible=True,
+                all_plus_form=False,
+                show_all_coefficients=False,
+                RREF_func=RREF_func,
+                show_zero_constants=False,
             )
         )
     )

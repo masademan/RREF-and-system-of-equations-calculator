@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from main import (
+    gauss_jordan_elimination,
     column_by_column_RREF,
     clear_console,
 )
@@ -78,8 +79,8 @@ def get_augmented_matrix() -> tuple[np.ndarray, bool]:
     return get_augmented_matrix_input(use_fractions=use_fractions), show_as_fractions
 
 if __name__ == "__main__":
-    # RREF_func = gauss_jordan_elimination
-    RREF_func = column_by_column_RREF
+    RREF_func = gauss_jordan_elimination
+    # RREF_func = column_by_column_RREF
 
     og_matrix, show_as_fraction = get_augmented_matrix()
     # augmented_matrix = get_augmented_matrix_input(use_fractions=True)
