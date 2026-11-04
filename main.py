@@ -149,7 +149,11 @@ def write_augmented_matrix_csv(file_path: str, augmented_matrix: np.ndarray) -> 
 
 
 def augmented_matrix_to_equation_strs(
-    augmented_matrix: np.ndarray, int_if_possible: bool = True, all_plus_form: bool = False, all_vars: bool = True, show_all_coefficients: bool = True
+    augmented_matrix: np.ndarray,
+    int_if_possible: bool = True,
+    all_plus_form: bool = False,
+    all_vars: bool = True,
+    show_all_coefficients: bool = True,
 ) -> str:
     if not is_valid_augmented_matrix(augmented_matrix):
         raise ValueError("The matrix given is not a valid augmented matrix")
@@ -167,29 +171,19 @@ def augmented_matrix_to_equation_strs(
             if int(coeff) == coeff and int_if_possible:
                 coeff = int(coeff)
 
+            if coeff != 1 or show_all_coefficients or type(coeff).__name__ in {"Fraction", "float"}:
+                single_equation.append(f"({coeff})x_{coeff_idx + 1}")
+            else:
+                single_equation.append(f"x_{coeff_idx + 1}")
+
             if all_plus_form:
-                if coeff != 1 or show_all_coefficients:
-                    single_equation.append(f"({coeff})x_{coeff_idx + 1}")
-                else:
-                    single_equation.append(f"x_{coeff_idx + 1}")
                 single_equation.append("+")
             else:
-                if len(single_equation) == 0:
-                    if coeff != 1 or show_all_coefficients:
-                        single_equation.append(f"({coeff})x_{coeff_idx + 1}")
-                    else:
-                        single_equation.append(f"x_{coeff_idx + 1}")
-                else:
-                    single_equation.append("+" if coeff > 0 else "-")
-                    if abs(coeff) != 1 or show_all_coefficients:
-                        single_equation.append(f"({abs(coeff)})x_{coeff_idx + 1}")
-                    else:
-                        single_equation.append(f"x_{coeff_idx + 1}")
+                single_equation.append("+" if coeff > 0 else "-")
 
-        if all_plus_form and len(single_equation) > 0:
+        if len(single_equation) > 0:
             single_equation.pop()
-
-        if len(single_equation) == 0:
+        else:
             if not show_all_coefficients:
                 continue
             single_equation.append("0")
@@ -309,8 +303,15 @@ def clean_matrix(matrix: np.ndarray) -> np.ndarray:
     return matrix
 
 
-def gauss_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into an REF matrix
+def gauss_elimination(
+    matrix: np.ndarray, print_all_steps: bool = False, matrix_as_type: type = float
+) -> np.ndarray:  # Turns a matrix into an REF matrix
     num_rows_to_ignore = 0
+
+    if print_all_steps:
+        print("Start:")
+        print(matrix.astype(matrix_as_type))
+        print()
 
     while not is_REF(matrix):
         viewable_matrix = matrix[num_rows_to_ignore:]
@@ -340,6 +341,11 @@ def gauss_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into 
 
             swap_rows(viewable_matrix, 0, row_idx)
 
+            if print_all_steps:
+                print("Swap:")
+                print(matrix.astype(matrix_as_type))
+                print()
+
         # If the entry in that top row is a, multiply the entire row by 1/a
         if viewable_matrix[0, column_idx] != 1:
             viewable_matrix[0, :] *= 1 / viewable_matrix[0, column_idx]
@@ -347,11 +353,21 @@ def gauss_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into 
         if matrix.dtype != object:
             clean_matrix(matrix)
 
+        if print_all_steps:
+            print("Multiply:")
+            print(matrix.astype(matrix_as_type))
+            print()
+
         # Add suitable multiples of the top row to the rows below so that the entries below the 1 become 0
         viewable_matrix[1:] += np.outer(-viewable_matrix[1:, column_idx], viewable_matrix[0, :])
 
         if matrix.dtype != object:
             clean_matrix(matrix)
+
+        if print_all_steps:
+            print("Subtract below:")
+            print(matrix.astype(matrix_as_type))
+            print()
 
         # Repeat, but ignore the top row
         num_rows_to_ignore += 1
@@ -359,8 +375,10 @@ def gauss_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into 
     return matrix
 
 
-def gauss_jordan_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into an RREF matrix
-    gauss_elimination(matrix)
+def gauss_jordan_elimination(
+    matrix: np.ndarray, print_all_steps: bool = False, matrix_as_type: type = float
+) -> np.ndarray:  # Turns a matrix into an RREF matrix
+    gauss_elimination(matrix, print_all_steps, matrix_as_type)
 
     # Starting at the last nonzero row and going upwards, add suitable multiples
     #  of each row to the rows above to introduce zeros above the leading entries
@@ -378,13 +396,28 @@ def gauss_jordan_elimination(matrix: np.ndarray) -> np.ndarray:  # Turns a matri
         if matrix.dtype != object:
             clean_matrix(matrix)
 
+        if print_all_steps:
+            print("Subtract above:")
+            print(matrix.astype(matrix_as_type))
+            print()
+
         row_idx -= 1
+
+    if print_all_steps:
+        print("Final:")
 
     return matrix
 
 
-def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix into an RREF matrix without making a substep of an REF matrix
+def column_by_column_RREF(
+    matrix: np.ndarray, print_all_steps: bool = False, matrix_as_type: type = float
+) -> np.ndarray:  # Turns a matrix into an RREF matrix without making a substep of an REF matrix
     row_idx = 0
+
+    if print_all_steps:
+        print("Start:")
+        print(matrix.astype(matrix_as_type))
+        print()
 
     while not is_RREF(matrix) and row_idx < matrix.shape[0]:
         if (matrix[row_idx:] == 0).all():
@@ -412,6 +445,11 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
 
             swap_rows(matrix, row_idx, sub_row_idx)
 
+            if print_all_steps:
+                print("Swap:")
+                print(matrix.astype(matrix_as_type))
+                print()
+
         # If the entry in that top row is a, multiply the entire row by 1/a
         if matrix[row_idx, column_idx] != 1:
             matrix[row_idx, :] *= 1 / matrix[row_idx, column_idx]
@@ -419,11 +457,21 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
         if matrix.dtype != object:
             clean_matrix(matrix)
 
+        if print_all_steps:
+            print("Multiply:")
+            print(matrix.astype(matrix_as_type))
+            print()
+
         # Add suitable multiples of the top row to the rows below so that the entries below the 1 become 0
         matrix[row_idx + 1 :] += np.outer(-matrix[row_idx + 1 :, column_idx], matrix[row_idx, :])
 
         if matrix.dtype != object:
             clean_matrix(matrix)
+
+        if print_all_steps:
+            print("Subtract below:")
+            print(matrix.astype(matrix_as_type))
+            print()
 
         # Add suitable multiples of the top row to the rows above so that the entries below the 1 become 0
         if row_idx > 0:
@@ -432,8 +480,16 @@ def column_by_column_RREF(matrix: np.ndarray) -> np.ndarray:  # Turns a matrix i
             if matrix.dtype != object:
                 clean_matrix(matrix)
 
+            if print_all_steps:
+                print("Subtract above:")
+                print(matrix.astype(matrix_as_type))
+                print()
+
         # Repeat, but ignore the top row
         row_idx += 1
+
+    if print_all_steps:
+        print("Final:")
 
     return matrix
 
@@ -483,13 +539,19 @@ def systems_of_equation_solver(
             value = RREF_matrix[row_idx, -1]
             if int(value) == value and int_if_possible:
                 value = int(value)
-                
-            if (RREF_matrix[row_idx, :-1] == 1).sum() == 1 and (RREF_matrix[row_idx, :-1] == 0).sum() in {RREF_matrix.shape[1] - 1, RREF_matrix.shape[1] - 2}:
+
+            if (RREF_matrix[row_idx, :-1] == 1).sum() == 1 and (RREF_matrix[row_idx, :-1] == 0).sum() in {
+                RREF_matrix.shape[1] - 1,
+                RREF_matrix.shape[1] - 2,
+            }:
                 if all_str:
                     variable_values.append(str(value))
                 else:
                     variable_values.append(value)
             else:
+                epsilon = 1e-5
+                use_epsilon = False
+
                 str_pieces = [str(value)]
 
                 variable_idxs = np.where(RREF_matrix[row_idx, :-1] != 0)[0][1:]
@@ -504,7 +566,15 @@ def systems_of_equation_solver(
                             var_coeff = int(var_coeff)
 
                         if var_coeff != 1 or show_all_coefficients:
-                            if do_coefficient_parentheses and var_coeff > 0:
+                            if (
+                                do_coefficient_parentheses
+                                or var_coeff < 0
+                                or type(var_coeff).__name__
+                                in {
+                                    "Fraction",
+                                    "float",
+                                }
+                            ):
                                 str_pieces.append(f"({var_coeff})x_{variable_idx + 1}")
                             else:
                                 str_pieces.append(f"{var_coeff}x_{variable_idx + 1}")
@@ -518,17 +588,20 @@ def systems_of_equation_solver(
                         str_pieces.append("+" if var_coeff > 0 else "-")
 
                         if abs(var_coeff) != 1 or show_all_coefficients:
-                            if do_coefficient_parentheses:
+                            if do_coefficient_parentheses or type(var_coeff).__name__ in {"Fraction", "float"}:
                                 str_pieces.append(f"({abs(var_coeff)})x_{variable_idx + 1}")
                             else:
                                 str_pieces.append(f"{abs(var_coeff)}x_{variable_idx + 1}")
                         else:
                             str_pieces.append(f"x_{variable_idx + 1}")
-                            
-                epsilon = 1e-5
-                use_epsilon = False
+
                 if not show_zero_constants and ((value == 0 and not use_epsilon) or (abs(value) <= epsilon and use_epsilon)):
-                    str_pieces = str_pieces[2:]
+                    str_pieces = str_pieces[1:]
+
+                    if str_pieces[0] != "+":
+                        str_pieces[1] = "-" + str_pieces[1]
+
+                    str_pieces = str_pieces[1:]
 
                 variable_values.append(" ".join(str_pieces))
 
@@ -570,10 +643,14 @@ if __name__ == "__main__":
     print(augmented_matrix)
     print()
     print("Equations:")
-    print(augmented_matrix_to_equation_strs(augmented_matrix, int_if_possible=True, all_plus_form=True, all_vars=True, show_all_coefficients=True))
+    print(
+        augmented_matrix_to_equation_strs(
+            augmented_matrix, int_if_possible=True, all_plus_form=True, all_vars=True, show_all_coefficients=True
+        )
+    )
     print()
     print("RREF:")
-    print(RREF_func(augmented_matrix))
+    print(RREF_func(augmented_matrix, print_all_steps=False))
     print()
     print("Variable values:")
     print(
@@ -586,7 +663,7 @@ if __name__ == "__main__":
                 show_all_coefficients=True,
                 RREF_func=RREF_func,
                 show_zero_constants=True,
-                do_coefficient_parentheses=False,
+                do_coefficient_parentheses=True,
             )
         )
     )
